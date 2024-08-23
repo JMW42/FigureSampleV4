@@ -18,7 +18,7 @@ import matplotlib.patches as patches
 
 pil_img = None # pillow Image for original image
 image_axes = None
-data_norm = None #  numpy array for norm data
+data_metric = None #  numpy array for metric data
 
 df_result = None
 
@@ -66,8 +66,8 @@ strvar_weight_green = tk.StringVar(root, 1)
 strvar_weight_blue = tk.StringVar(root, 1)
 strvar_weight_alpha = tk.StringVar(root, 1)
 
-strvar_filter_norm_min = tk.StringVar(root, 0)
-strvar_filter_norm_max = tk.StringVar(root, 1)
+strvar_filter_metric_min = tk.StringVar(root, 0)
+strvar_filter_metric_max = tk.StringVar(root, 1)
 
 # ####################################################################################################
 # ####################################################################################################
@@ -83,7 +83,7 @@ def get_ncweight():
     return (int(strvar_weight_red.get()), int(strvar_weight_green.get()), int(strvar_weight_blue.get()), int(strvar_weight_alpha.get()))
 
 def get_nfilter():
-    return (float(strvar_filter_norm_min.get()), float(strvar_filter_norm_max.get()))
+    return (float(strvar_filter_metric_min.get()), float(strvar_filter_metric_max.get()))
 
 # ####################################################################################################
 # ####################################################################################################
@@ -117,7 +117,7 @@ def btn_update_visuals():
     aggcanvas_img.draw()
 
 
-def btn_calcnorm():
+def btn_calcmetric():
     print("sampling image ...")
 
     # sampling frame as tuple: (x1, y1, x2, y2)
@@ -127,26 +127,26 @@ def btn_calcnorm():
     rcolor = get_rcolor()
     print(f"rcolor={rcolor}")
 
-    # get norm weight as tuple: (r, g, b, a)
+    # get metric weight as tuple: (r, g, b, a)
     ncweight = get_ncweight()
 
     # get image data
     img_data = np.asanyarray(pil_img)
 
 
-    # calculate norm values
+    # calculate metric values
     
     def thread_func():
-        global data_norm, norm_axes
-        print("calcularting color norm ...")
-        data_norm = fs4.calculate_color_norm(img_data, sframe, rcolor, ncweight)# calculate norm matrix
-        np.savetxt("norm.csv", data_norm, delimiter=",") # save norm for debug purposes
+        global data_metric, metric_axes
+        print("calcularting color metric ...")
+        data_metric = fs4.calculate_color_metric(img_data, sframe, rcolor, ncweight)# calculate metric matrix
+        np.savetxt("metric.csv", data_metric, delimiter=",") # save metric for debug purposes
 
         print(" ... finished")
 
-        norm_axes.clear()
-        norm_axes.imshow(data_norm, cmap="Greys")
-        aggcanvas_norm.draw()
+        metric_axes.clear()
+        metric_axes.imshow(data_metric, cmap="Greys")
+        aggcanvas_metric.draw()
 
     thread1 = threading.Thread(target=thread_func)
     thread1.start()  
@@ -156,9 +156,9 @@ def btn_evaluate():
     global df_result
     print("evaluating")
 
-    # get norm filter as tuple: (min, max)
+    # get metric filter as tuple: (min, max)
     nfilter = get_nfilter()
-    xarr, yarr, val = fs4.evaluate_norm(data_norm, nfilter)
+    xarr, yarr, val = fs4.evaluate_metric(data_metric, nfilter)
 
     df_result = pd.DataFrame({"x":xarr, "y":yarr, "val":val})
     df_result.to_csv("found.csv", sep=",", index=None)
@@ -173,12 +173,12 @@ def btn_evaluate():
     print("...finished")
 
 
-def btn_savenorm():
-    print("saving norm")
+def btn_savemetric():
+    print("saving metric")
 
 
     path = tk.filedialog.asksaveasfilename()
-    np.savetxt(path, data_norm)
+    np.savetxt(path, data_metric)
 
     print("saved")
 
@@ -303,8 +303,8 @@ sbox_color_alpha.pack(side=tk.LEFT)
 lframe_color.pack(side=tk.TOP, anchor=tk.NW, expand=True, fill="x")
 
 
-# main menu norm color weight
-lframe_weight = ttk.LabelFrame(tab_menu_main, text="Norm color weight:")
+# main menu metric color weight
+lframe_weight = ttk.LabelFrame(tab_menu_main, text="Metric color weight:")
 label_weight_red = tk.Label(lframe_weight, text="R")
 sbox_weight_red = ttk.Spinbox(lframe_weight, from_=0, to=10, width=3, textvariable=strvar_weight_red)
 label_weight_green = tk.Label(lframe_weight, text="G")
@@ -326,16 +326,16 @@ lframe_weight.pack(side=tk.TOP, anchor=tk.NW, expand=True, fill="x")
 
 
 # main menu filter & boundary settings 
-lframe_filter = ttk.LabelFrame(tab_menu_main, text="Norm filter:")
-label_filter_norm_min = tk.Label(lframe_filter, text="min")
-sbox_filter_norm_min = ttk.Spinbox(lframe_filter, from_=0, to=255, width=3, validate='all', textvariable=strvar_filter_norm_min)
-label_filter_norm_max = tk.Label(lframe_filter, text="max")
-sbox_filter_norm_max = ttk.Spinbox(lframe_filter, from_=0, to=255, width=3, validate='all', textvariable=strvar_filter_norm_max)
+lframe_filter = ttk.LabelFrame(tab_menu_main, text="Metric boundaries:")
+label_filter_metric_min = tk.Label(lframe_filter, text="min")
+sbox_filter_metric_min = ttk.Spinbox(lframe_filter, from_=0, to=255, width=3, validate='all', textvariable=strvar_filter_metric_min)
+label_filter_metric_max = tk.Label(lframe_filter, text="max")
+sbox_filter_metric_max = ttk.Spinbox(lframe_filter, from_=0, to=255, width=3, validate='all', textvariable=strvar_filter_metric_max)
 
-label_filter_norm_min.pack(side=tk.LEFT)
-sbox_filter_norm_min.pack(side=tk.LEFT)
-label_filter_norm_max.pack(side=tk.LEFT)
-sbox_filter_norm_max.pack(side=tk.LEFT)
+label_filter_metric_min.pack(side=tk.LEFT)
+sbox_filter_metric_min.pack(side=tk.LEFT)
+label_filter_metric_max.pack(side=tk.LEFT)
+sbox_filter_metric_max.pack(side=tk.LEFT)
 lframe_filter.pack(side=tk.TOP, anchor=tk.NW, expand=True, fill="x")
 
 
@@ -343,22 +343,22 @@ lframe_filter.pack(side=tk.TOP, anchor=tk.NW, expand=True, fill="x")
 lframe_sampling = ttk.LabelFrame(tab_menu_main, text="Sampling:")
 button_sampeling_loadconfig = tk.Button(lframe_sampling, text="Load config")
 button_sampeling_update = tk.Button(lframe_sampling, text="Update visuals", command=btn_update_visuals)
-button_sampeling_calcnorm = tk.Button(lframe_sampling, text="Calculate Norm", command=btn_calcnorm)
+button_sampeling_calcmetric = tk.Button(lframe_sampling, text="Calculate metric", command=btn_calcmetric)
 button_sampeling_evaluate = tk.Button(lframe_sampling, text="Evaluate", command=btn_evaluate)
 
 button_sampeling_loadconfig.pack(side=tk.LEFT, anchor=tk.N)
 button_sampeling_update.pack(side=tk.LEFT, anchor=tk.N)
-button_sampeling_calcnorm.pack(side=tk.LEFT, anchor=tk.N)
+button_sampeling_calcmetric.pack(side=tk.LEFT, anchor=tk.N)
 lframe_sampling.pack(side=tk.TOP, anchor=tk.NW, expand=True, fill="x")
 button_sampeling_evaluate.pack(side=tk.TOP, anchor=tk.NW, expand=True, fill="x")
 lframe_sampling.pack()
 
 # main menu save data:
 lframe_save = ttk.LabelFrame(tab_menu_main, text="Save:")
-button_save_norm = tk.Button(lframe_save, text="Save norm data", command=btn_savenorm)
+button_save_metric = tk.Button(lframe_save, text="Save metric data", command=btn_savemetric)
 button_save_result = tk.Button(lframe_save, text="Save result", command=btn_saveresult)
 
-button_save_norm.pack(side=tk.LEFT, expand=True, fill="x")
+button_save_metric.pack(side=tk.LEFT, expand=True, fill="x")
 button_save_result.pack(side=tk.LEFT, expand=True, fill="x")
 lframe_save.pack(side=tk.LEFT, expand=True, fill="x")
 
@@ -376,12 +376,12 @@ frame_main = tk.Frame(root, bg="blue")
 
 tabs_main = ttk.Notebook(frame_main)
 tab_main_image = ttk.Frame(tabs_main)
-tab_main_norm = ttk.Frame(tabs_main)
+tab_main_metric = ttk.Frame(tabs_main)
 tab_main_result = ttk.Frame(tabs_main)
 
 
 tabs_main.add(tab_main_image, text='Image')
-tabs_main.add(tab_main_norm, text='Norm')
+tabs_main.add(tab_main_metric, text='metric')
 tabs_main.add(tab_main_result, text='Result')
 
 
@@ -403,26 +403,26 @@ aggcanvas_img.draw()
 label_img_title.pack()
 frame_main_image.pack()
 
-# main view norm tab:
-label_norm_title = tk.Label(tab_main_norm, text="Norm:")
-frame_norm_plot = ttk.Frame(tab_main_norm)
+# main view metric tab:
+label_metric_title = tk.Label(tab_main_metric, text="metric:")
+frame_metric_plot = ttk.Frame(tab_main_metric)
 
-label_norm_title.pack()
-frame_norm_plot.pack()
+label_metric_title.pack()
+frame_metric_plot.pack()
 
 
-#frame_norm_plot
-tkfig_norm = Figure(figsize = (5, 5), dpi=100)
-norm_axes = tkfig_norm.add_subplot(111) 
+#frame_metric_plot
+tkfig_metric = Figure(figsize = (5, 5), dpi=100)
+metric_axes = tkfig_metric.add_subplot(111) 
 
-aggcanvas_norm = FigureCanvasTkAgg(tkfig_norm, master = frame_norm_plot)
+aggcanvas_metric = FigureCanvasTkAgg(tkfig_metric, master = frame_metric_plot)
 
-aggcanvas_norm .get_tk_widget().pack() 
-toolbar = NavigationToolbar2Tk(aggcanvas_norm , frame_norm_plot) 
+aggcanvas_metric .get_tk_widget().pack() 
+toolbar = NavigationToolbar2Tk(aggcanvas_metric , frame_metric_plot) 
 toolbar.update()
-aggcanvas_norm.draw()
+aggcanvas_metric.draw()
 
-aggcanvas_norm.get_tk_widget().pack()
+aggcanvas_metric.get_tk_widget().pack()
 
 
 # main view result tab:
