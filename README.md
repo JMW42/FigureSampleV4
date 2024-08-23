@@ -1,8 +1,7 @@
 # FigureSampleV4
 
-__Scientific figure/trace data extraction software__ `<br>`
+__Scientific figure/trace data extraction software__
 *VERSION: 0.1*
-`<br>`
 
 FigureSampelV4 allows to "sample" a given (scientific) data visualization aka. a "plot" and converts the image back to a dataset containing numbers.
 I started this project as part of my work as a research assistant with version 1 and soon after 2.
@@ -10,9 +9,8 @@ Although version 2 was quite popular with my colleagues, version 3 was discontin
 Therefore I started version 4 as a hobby project, I work on in my free time.
 To avoid legal problems version 4 does not use any code used by previous version!
 
-Right now it is my plan to progress further and surpass the work I did in the past.
-At the moment there is no roadmap I follow, but I plan to soon write one and add it to this repository.
-Further it is my plan to write a short user manual in LaTeX.
+Right now it is my plan to progress further and surpass the work I did in the past (version 0.3).
+At the moment i am not totally sure what features i want to include therfore the roadmap is not fully written down yet.
 
 I am highly interested in feedback and open for new ideas and any advice you want to give me!
 Feel free to use the scripts for your own work!
